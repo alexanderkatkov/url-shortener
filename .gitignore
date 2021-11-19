@@ -1,0 +1,8 @@
+###< Phpstorm ###
+.idea/*
+JetBrains.Dockerfile
+###< Phpstorm ###
+
+###< gitkeep ###
+!/**/.gitkeep
+###> gitkeep ###
