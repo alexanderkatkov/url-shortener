@@ -1,0 +1,33 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - vendor/phpstan/phpstan-phpunit/extension.neon
+    - vendor/phpstan/phpstan-phpunit/rules.neon
+parameters:
+    checkGenericClassInNonGenericObjectType: false
+    checkMissingIterableValueType: false
+    reportUnmatchedIgnoredErrors: false
+    universalObjectCratesClasses:
+        - PHPUnit\Framework\MockObject\MockObject
+    symfony:
+    excludes_analyse:
+        - %rootDir%/../../../src/Migrations/*
+        - %rootDir%/../../../src/DataFixtures/*
+#    bootstrapFiles:
+#        - bin/phpunit.php
+    ignoreErrors:
+        - '#^Parameter \#1 \$x of method Doctrine\Common\Collections\ExpressionBuilder::andX\(\) expects array<int, mixed>\|null, Doctrine\\Common\\Collections\\Expr\\Comparison given.#'
+        - '#^Parameter \#1 \$x of method Doctrine\Common\Collections\ExpressionBuilder::orX\(\) expects array<int, mixed>\|null, Doctrine\\Common\\Collections\\Expr\\CompositeExpression given.#'
+        - '#^Parameter \#1 \$x of method Doctrine\Common\Collections\ExpressionBuilder::orX\(\) expects array<int, mixed>\|null, Doctrine\\Common\\Collections\\Expr\\Expression\|null given.#'
+        - '#^Call to an undefined method object::getStatus\(\)#'
+        - '#^Call to an undefined method Doctrine\\Persistence\\ObjectRepository::refresh\(\).#'
+        - '#^Call to an undefined method object::get\(\).#'
+        - '#^Service "behat.service_container" is not registered in the container.#'
+        - '#^Property App\\Tests\\Behat\\RestContext::\$sharingContext \(App\\Tests\\Behat\\SharingContext\) does not accept Behat\\Behat\\Context\\Context.#'
+        - '#^Call to an undefined method Http\\Client\\HttpClient::getRequests\(\).#'
+        - '#^Call to an undefined method Behat\\Mink\\Driver\\DriverInterface::getClient\(\).#'
+        - '#Property .* type has no value type specified in iterable type array#'
+        - '#Method .* has parameter .* with no value type specified in iterable type array#'
+        - '#Method .* return type has no value type specified in iterable type array#'
+        - '#Method .* has no return typehint specified#'
+    tmpDir: var/phpstan
