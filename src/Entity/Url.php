@@ -47,6 +47,9 @@ class Url
     #[ORM\Column(name: 'shortcode', type: 'string', length: 8)]
     private ?string $shortcode;
 
+    #[ORM\Column(name: 'redirect_count', type: 'integer')]
+    private int $redirectCount = 0;
+
     public function __construct()
     {
         $this->id = Uuid::v4();
@@ -72,6 +75,18 @@ class Url
     public function getShortcode(): ?string
     {
         return $this->shortcode;
+    }
+
+    public function getRedirectCount(): int
+    {
+        return $this->redirectCount;
+    }
+
+    public function increaseRedirectCount(): self
+    {
+        $this->redirectCount++;
+
+        return $this;
     }
 
     #[ORM\PrePersist()]
