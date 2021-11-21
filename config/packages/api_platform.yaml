@@ -6,5 +6,7 @@ api_platform:
     formats:
         json: [ 'application/json' ]
         html: [ 'text/html' ]
+    error_formats:
+        jsonproblem: ['application/problem+json']
     swagger:
         versions: [3]
