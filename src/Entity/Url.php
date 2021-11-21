@@ -45,7 +45,6 @@ class Url
     private ?string $url;
 
     #[ORM\Column(name: 'shortcode', type: 'string', length: 8)]
-    #[Assert\NotBlank]
     private ?string $shortcode;
 
     public function __construct()
