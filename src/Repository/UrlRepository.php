@@ -19,4 +19,14 @@ class UrlRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Url::class);
     }
+
+    public function countTotalRedirects(): array
+    {
+        $qb = $this->createQueryBuilder('urls');
+
+        return $qb
+            ->select('SUM(urls.redirectCount) as totalRedirectCount')
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
