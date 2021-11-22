@@ -87,6 +87,7 @@
         "squizlabs/php_codesniffer": "^3.6",
         "symfony/browser-kit": "5.3.*",
         "symfony/css-selector": "5.3.*",
+        "symfony/http-client": "5.3.*",
         "symfony/maker-bundle": "^1.36",
         "symfony/phpunit-bridge": "^5.3"
     }
