@@ -89,6 +89,9 @@ app-db-remove:
 app-exec:
 	@${DOCKER} exec -it ${CONTAINER_PREFIX}.${APP} ${CMD}
 
+app-fixtures-load:
+	@${MAKE} app-exec CMD="php bin/console doctrine:fixtures:load --env=$(ENV) -n"
+
 app-lint:
 	make app-lint-phpstan
 	make app-lint-phpcs

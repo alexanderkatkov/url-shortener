@@ -8,6 +8,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Repository\UrlRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -16,7 +17,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks()]
 #[ApiResource(
     collectionOperations: ['get', 'post'],
-    itemOperations: ['get', 'delete']
+    itemOperations: ['get', 'delete'],
+    attributes: [
+        'normalization_context' => ['groups' => ['url:read']],
+        'denormalization_context' => ['groups' => ['url:write']],
+    ]
 )]
 #[ApiFilter(SearchFilter::class, properties: ['shortcode' => 'exact'])]
 class Url
@@ -29,6 +34,7 @@ class Url
      *     @Assert\Uuid()
      * })
      */
+    #[Groups(["url:read"])]
     private Uuid $id;
 
     #[ORM\Column(name: 'url', type: 'string', length: 255)]
@@ -42,12 +48,15 @@ class Url
      *     )
      * })
      */
+    #[Groups(["url:read", "url:write"])]
     private ?string $url;
 
     #[ORM\Column(name: 'shortcode', type: 'string', length: 8)]
+    #[Groups(["url:read"])]
     private ?string $shortcode;
 
     #[ORM\Column(name: 'redirect_count', type: 'integer', options: ['default' => 0])]
+    #[Groups(["url:read"])]
     private int $redirectCount = 0;
 
     public function __construct()
@@ -75,6 +84,13 @@ class Url
     public function getShortcode(): ?string
     {
         return $this->shortcode;
+    }
+
+    public function setRedirectCount(int $count): self
+    {
+        $this->redirectCount = $count;
+
+        return $this;
     }
 
     public function getRedirectCount(): int

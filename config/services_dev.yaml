@@ -1,0 +1,2 @@
+parameters:
+    fixtures_base_path: '%env(resolve:FIXTURES_BASE_PATH)%'
