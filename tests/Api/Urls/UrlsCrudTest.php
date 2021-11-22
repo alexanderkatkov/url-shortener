@@ -89,7 +89,7 @@ class UrlsCrudTest extends ApiTestCase
 
         $this->client->request('PUT', sprintf('%s/%s', self::API_URL, $bookUuid), [
             'json' => [
-                'ulr'
+                'ulr' => 'www.test.com',
             ],
             'headers' => [
                 'Content-Type' => 'application/json',
@@ -124,15 +124,16 @@ class UrlsCrudTest extends ApiTestCase
 
     public function testGetItemWithWrongIdFails(): void
     {
-        $this->client->request('GET',
-            sprintf('%s/%s', self::API_URL, '11111111-1111-1111-1111-111111111111'),
-            [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json',
-                ],
+        $this->client->request('GET', sprintf(
+            '%s/%s',
+            self::API_URL,
+            '11111111-1111-1111-1111-111111111111'
+        ), [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
             ],
-        );
+        ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
