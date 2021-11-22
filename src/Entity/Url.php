@@ -6,7 +6,6 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
-use App\Controller\RedirectCountEndpointController;
 use App\Repository\UrlRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
@@ -48,7 +47,7 @@ class Url
     #[ORM\Column(name: 'shortcode', type: 'string', length: 8)]
     private ?string $shortcode;
 
-    #[ORM\Column(name: 'redirect_count', type: 'integer')]
+    #[ORM\Column(name: 'redirect_count', type: 'integer', options: ['default' => 0])]
     private int $redirectCount = 0;
 
     public function __construct()
