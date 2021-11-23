@@ -3,21 +3,124 @@ declare(strict_types=1);
 
 namespace App\Tests\Api;
 
-use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\Client;
 use App\Entity\Url;
+use App\Tests\AliceFixtureDependentTestCase;
+use App\Tests\Traits\DatabasePurger;
+use App\Tests\Traits\GetContainerInstance;
+use App\Tests\Traits\GetEntityManager;
 use Generator;
 use Symfony\Component\HttpFoundation\Response;
 
-class UrlsCrudTest extends ApiTestCase
+class UrlsCrudTest extends AliceFixtureDependentTestCase
 {
+    use GetEntityManager, DatabasePurger, GetContainerInstance;
+
     private const API_URL = '/api/urls';
 
     private Client $client;
 
+    protected function getFixtureFiles(): array
+    {
+        return ['Url.yaml'];
+    }
+
     protected function setUp(): void
     {
+        parent::setUp();
+        self::ensureKernelShutdown();
+
         $this->client = static::createClient();
+    }
+
+    public function testPutUrlNotAllowed(): void
+    {
+        /** @var Url $firstUrl */
+        $firstUrl = $this->getReference('url_1');
+
+        $this->client->request('PUT', sprintf('%s/%s', self::API_URL, $firstUrl->getId()), [
+            'json' => [
+                'ulr' => 'www.test.com',
+            ],
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_METHOD_NOT_ALLOWED);
+    }
+
+    public function testGetItem(): void
+    {
+        /** @var Url $firstUrl */
+        $firstUrl = $this->getReference('url_1');
+
+        $this->client->request('GET', sprintf('%s/%s', self::API_URL, $firstUrl->getId()), [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+        self::assertResponseHeaderSame('content-type', 'application/json; charset=utf-8');
+        self::assertMatchesResourceItemJsonSchema(Url::class);
+    }
+
+    public function testGetItemWithWrongId(): void
+    {
+        $this->client->request('GET', sprintf(
+            '%s/%s',
+            self::API_URL,
+            '11111111-1111-1111-1111-111111111111'
+        ), [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
+
+    public function testGetUrls(): void
+    {
+        $response = $this->client->request('GET', self::API_URL, [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+        self::assertResponseHeaderSame('content-type', 'application/json; charset=utf-8');
+        self::assertCount(3, $response->toArray());
+        self::assertMatchesResourceCollectionJsonSchema(Url::class);
+    }
+
+    public function testDeleteUrl(): void
+    {
+        /** @var Url $firstUrl */
+        $firstUrl = $this->getReference('url_1');
+
+        $this->client->request(
+            'DELETE',
+            sprintf('%s/%s', self::API_URL, $firstUrl->getId()),
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json',
+                ],
+            ]
+        );
+        self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
+        self::assertNull(
+            static::getContainer()
+                ->get('doctrine')
+                ->getRepository(Url::class)
+                ->findOneBy(['id' => $firstUrl->getId()])
+        );
     }
 
     public function testCreateUrl(): void
@@ -75,104 +178,5 @@ class UrlsCrudTest extends ApiTestCase
             'payload' => [],
             'responseCode' => Response::HTTP_UNPROCESSABLE_ENTITY,
         ];
-    }
-
-    public function testPutUrlNotAllowed(): void
-    {
-        $response = $this->client->request('GET', self::API_URL, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-        ]);
-        $bookUuid = $response->toArray()[0]['id'];
-
-        $this->client->request('PUT', sprintf('%s/%s', self::API_URL, $bookUuid), [
-            'json' => [
-                'ulr' => 'www.test.com',
-            ],
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-        ]);
-
-        self::assertResponseStatusCodeSame(Response::HTTP_METHOD_NOT_ALLOWED);
-    }
-
-    public function testGetItem(): void
-    {
-        $response = $this->client->request('GET', self::API_URL, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-        ]);
-        $bookUuid = $response->toArray()[0]['id'];
-
-        $this->client->request('GET', sprintf('%s/%s', self::API_URL, $bookUuid), [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-        ]);
-
-        self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertResponseHeaderSame('content-type', 'application/json; charset=utf-8');
-        self::assertMatchesResourceItemJsonSchema(Url::class);
-    }
-
-    public function testGetItemWithWrongIdFails(): void
-    {
-        $this->client->request('GET', sprintf(
-            '%s/%s',
-            self::API_URL,
-            '11111111-1111-1111-1111-111111111111'
-        ), [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-        ]);
-
-        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
-    }
-
-    public function testGetUrls(): void
-    {
-        $response = $this->client->request('GET', self::API_URL, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-        ]);
-
-        self::assertResponseStatusCodeSame(Response::HTTP_OK);
-        self::assertResponseHeaderSame('content-type', 'application/json; charset=utf-8');
-        self::assertCount(1, $response->toArray());
-        self::assertMatchesResourceCollectionJsonSchema(Url::class);
-    }
-
-    public function testDeleteUrl(): void
-    {
-        $response = $this->client->request('GET', self::API_URL, [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-        ]);
-
-        $bookUuid = $response->toArray()[0]['id'];
-
-        $this->client->request('DELETE', sprintf('%s/%s', self::API_URL, $bookUuid), [
-            'headers' => [
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ],
-        ]);
-        self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
-        self::assertNull(
-            static::getContainer()->get('doctrine')->getRepository(Url::class)->findOneBy(['id' => $bookUuid])
-        );
     }
 }

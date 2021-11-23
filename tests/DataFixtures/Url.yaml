@@ -1,0 +1,10 @@
+App\Entity\Url:
+    url_1:
+        url (unique): <url()>
+        redirectCount: 2
+    url_2:
+        url (unique): <url()>
+        redirectCount: 0
+    url_3:
+        url (unique): <url()>
+        redirectCount: 7
