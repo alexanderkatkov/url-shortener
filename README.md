@@ -1,7 +1,7 @@
 # url-shortener
 
 ### Repository
-Project Repository (GitLab): https://github.com/alexanderkatkov/url-shortener
+Project Repository (Github): https://github.com/alexanderkatkov/url-shortener
 
 ### URLS
 #### Docs
